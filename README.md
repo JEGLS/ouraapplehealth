@@ -27,9 +27,42 @@ These shortcuts aim to export five data types from Oura to Health (click the lin
 > [!IMPORTANT]
 > These shortcuts are **not** a way to get around the Oura Subscription, they need to be able to access the Oura API, which is only possible **with** a subscription. Note that for _Generation 2_ users this should not be a requirement, only for _Generation 3/4/5_ users.
 
-### Set-up <a name="set-up"></a>
+### Set-up with OAuth (recommended) <a name="set-up"></a>
 
-This is quick and simple.
+Oura is retiring Personal Access Tokens. The shortcuts in [`oauth/`](oauth) use OAuth2 instead. They refresh their own access with a token saved in iCloud Drive, so you only sign in once.
+
+**1. Create an Oura application**
+
+1. Go to [developer.ouraring.com](https://developer.ouraring.com) and create an application.
+2. Open the application's details and set the **Redirect URI** to exactly `http://localhost`.
+3. Keep the Client ID and Client Secret available. Treat the secret like a password.
+
+**2. Sign the shortcuts on a Mac**
+
+iPhone and iPad only import signed shortcut files, and signing needs a Mac (macOS 12 or later).
+
+1. Download or clone this repository on the Mac.
+2. In Terminal, run `bash oauth/sign.sh` from the repository folder.
+3. Send the files in `oauth/signed/` to your iPhone (AirDrop, or copy them to iCloud Drive) and open each one to import it.
+
+**3. Connect your Oura account**
+
+1. Run **Oura Setup** on the iPhone.
+2. Enter the Client ID and Client Secret.
+3. Safari opens the Oura sign in page. Sign in and tap Allow.
+4. Safari then shows a page that cannot load. That is expected. Copy the full address from the address bar (it starts with `http://localhost/?code=`), go back to Shortcuts, and paste it into the prompt. The code expires after a few minutes.
+5. You should see "Oura is connected". Your credentials are stored in `iCloud Drive/Shortcuts/oura_auth.json`.
+
+**4. Automate**
+
+Set up an [_automation_](https://support.apple.com/guide/shortcuts/create-a-new-personal-automation-apdfbdbd7123/ios) that runs the data shortcuts **one after another in a single automation**. Oura refresh tokens can only be used once, so two shortcuts refreshing at the same moment would break the chain. If a shortcut reports "Oura token refresh failed", run Oura Setup again.
+
+> [!NOTE]
+> To rebuild the OAuth shortcuts after changing the originals, run `python3 tools/build_oauth.py`. It reads the signed shortcuts in the repository root, replaces the API key block with the OAuth token refresh, and writes unsigned files to `oauth/unsigned/`.
+
+### Set-up with a Personal Access Token (legacy)
+
+This only works while Oura still accepts Personal Access Tokens.
 
 1. Download the desired shortcuts as linked in the introduction
 2. Generate an Oura _Personal Access Token_ (API key) [here](https://cloud.ouraring.com/personal-access-tokens)
